@@ -10,9 +10,10 @@
 # -i Application Insights Name
 # -c Content Delivery Network (CDN) - empty to be optional
 # -s Storage Account - empty to be optional
+# -r Redis Cache - empty to be optional
 # 
 # Executing it with minimum parameters:
-#   ./azuredeploy_shared.sh -r wordpress-rg -l westeurope -m wp-mysql-svr -u mysqladmin -k wordpress-kv -p mysqladminpwd -i wordpress-ai -c wordpress-cdn -s wordpressst01
+#   ./azuredeploy_shared.sh -r wordpress-rg -l westeurope -m wp-mysql-svr -u mysqladmin -k wordpress-kv -p mysqladminpwd -i wordpress-ai -c wordpress-cdn -s wordpressst01 -r wpredis-rc
 #
 # This script assumes that you already executed "az login" to authenticate 
 #
@@ -34,6 +35,7 @@ do
 		i) APPINSIGHTS=${OPTARG};;
 		c) CDN=${OPTARG};;
 		s) STORAGEACC=${OPTARG};;
+		s) REDIS=${OPTARG};;
 	esac
 done
 
@@ -57,7 +59,8 @@ echo "   Key Vault: ${KV}"
 echo "   Key Vault Label MySQL Admin Pwd: ${KVMYSQLPWD}"
 echo "   Application Insights: ${APPINSIGHTS}"
 echo "   CDN: ${CDN}"
-echo "   Storage Account: ${STORAGEACC}"; echo
+echo "   Storage Account: ${STORAGEACC}"
+echo "   Redis Cache: ${REDIS}"; echo
 
 #--------------------------------------------
 # Registering providers & extentions
@@ -72,6 +75,7 @@ az provider register -n Microsoft.Compute
 az provider register -n Microsoft.keyvault
 az provider register -n Microsoft.CDN
 az provider register -n Microsoft.Storage
+az provider register -n Microsoft.Redis
 
 #--------------------------------------------
 # Creating Resource group
@@ -150,4 +154,16 @@ then
 	az storage account create -n $STORAGEACC -g $RESOURCEGROUP -l $LOCATION --sku Standard_LRS --kind StorageV2
 else
 	echo "   Storage Account ${STORAGEACC} already exists or is not provided"
+fi
+
+#--------------------------------------------
+# Creating Redis Cache (optional)
+#-------------------------------------------- 
+echo "Creating Redis Cache ${REDIS}"
+RESULT=$(az redis show -n $REDIS -g $RESOURCEGROUP)
+if [[ -z "$RESULT"  &&  -n "$REDIS" ]]
+then
+	az redis create -n $REDIS -g $RESOURCEGROUP -l $LOCATION --sku Basic --vm-size c0
+else
+	echo "   Redis Cache ${REDIS} already exists or is not provided"
 fi
