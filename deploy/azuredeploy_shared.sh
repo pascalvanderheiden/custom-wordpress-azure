@@ -10,10 +10,10 @@
 # -i Application Insights Name
 # -c Content Delivery Network (CDN) - empty to be optional
 # -s Storage Account - empty to be optional
-# -r Redis Cache - empty to be optional
+# -x Redis Cache - empty to be optional
 # 
 # Executing it with minimum parameters:
-#   ./azuredeploy_shared.sh -r wordpress-rg -l westeurope -m wp-mysql-svr -u mysqladmin -k wordpress-kv -p mysqladminpwd -i wordpress-ai -c wordpress-cdn -s wordpressst01 -r wpredis-rc
+#   ./azuredeploy_shared.sh -r wordpress-rg -l westeurope -m wp-mysql-svr -u mysqladmin -k wordpress-kv -p mysqladminpwd -i wordpress-ai -c wordpress-cdn -s wordpressst01 -x wpredis-rc
 #
 # This script assumes that you already executed "az login" to authenticate 
 #
@@ -22,7 +22,7 @@
 # For example: az ad sp create-for-rbac --name multicontainerwponazure
 # Copy output JSON: AppId and password
 
-while getopts r:l:m:u:k:p:i:c:s: option
+while getopts r:l:m:u:k:p:i:c:s:x: option
 do
 	case "${option}"
 	in
@@ -35,7 +35,7 @@ do
 		i) APPINSIGHTS=${OPTARG};;
 		c) CDN=${OPTARG};;
 		s) STORAGEACC=${OPTARG};;
-		s) REDIS=${OPTARG};;
+		x) REDIS=${OPTARG};;
 	esac
 done
 
